@@ -1,12 +1,22 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Snake : MonoBehaviour
 {
+    #region Variables
+
+    public Transform SegmentPrefab;
+
     private Vector2 _direction;
+    public List<Transform> _segments;
+
+    #endregion
+
 
     private void Start()
     {
-
+        _segments = new List<Transform>();
+        _segments.Add(this.transform);
     }
 
 
@@ -29,8 +39,31 @@ public class Snake : MonoBehaviour
             _direction = Vector2.left;
         }
     }
+
     private void FixedUpdate()
     {
-        transform.position = new Vector3(Mathf.Round(transform.position.x + _direction.x), Mathf.Round(transform.position.y + _direction.y), 0.0f);
+        for (int i = _segments.Count - 1; i > 0; i--)
+        {
+            _segments[i].position = _segments[i - 1].position;
+        }
+
+        var position = transform.position;
+        position = new Vector3(Mathf.Round(position.x + _direction.x), Mathf.Round(position.y + _direction.y), 0.0f);
+        transform.position = position;
+    }
+
+    private void Grow()
+    {
+        Transform segment = Instantiate(SegmentPrefab);
+        segment.position = _segments[_segments.Count - 1].position;
+        _segments.Add(segment);
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Food"))
+        {
+            Grow();
+        }
     }
 }
